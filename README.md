@@ -6,9 +6,9 @@ Note: this voluntarily doesn't start the runners as processes to avoid permissio
 
 ## Requirements
 
-- powershell
-- git
-- GitHub CLI
+- [PowerShell](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.4)
+- [git](https://git-scm.com/downloads/win)
+- [GitHub CLI](https://cli.github.com/)
 
 ## How to use
 
