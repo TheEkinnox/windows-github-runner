@@ -1,3 +1,7 @@
+# Ensure commands are run from the scripts base directory
+$basePath = (Get-Location).path
+Set-Location (split-path -parent $MyInvocation.MyCommand.Definition)
+
 # Load env file
 Get-Content .env | foreach {
     $name, $value = $_.split('=')
@@ -9,7 +13,7 @@ $repos = $env:GH_REPOSITORY
 $runnerVersion = $env:RUNNER_VERSION
 $runnerBaseName = $env:RUNNER_NAME + '_'
 
-$basePath = (Get-Location).path
+# Move to a sub folder to avoid poluting the root directory
 $runnersBasePath = "./_runners"
 
 if ($env:FORCE_UPDATE -like "true")
@@ -64,17 +68,12 @@ foreach ($repo in $reposArray)
         Write-Host "Registering GitHub Self Hosted Runner on: $owner/$repo"
 
         #(Re)start runner
-        & "$runnerPath/config.cmd" remove --unattended --token $regToken
+        & "$runnerPath/config.cmd" remove --token $regToken
         & "$runnerPath/config.cmd" --unattended --url "https://github.com/$owner/$repo" --token $regToken --name $runnerName --replace
-        Start-Job { cmd /c "$runnerPath/config.cmd" }
+        Start-Process "$runnerPath/run.cmd"
     } catch {
         Write-Error $_.Exception.Message
-        & "$runnerPath/config.cmd" remove --unattended --token $regToken
-    } finally {
-        # Trap signal with finally - cleanup (When docker container is stopped remove runner registration from GitHub)
-        # Does not currently work due to issue: https://github.com/moby/moby/issues/25982#
-        # Perform manual cleanup of stale runners using Cleanup-Runners.ps1
-        # & "$runnerPath/config.cmd" remove --unattended --token $regToken
+        & "$runnerPath/config.cmd" remove --token $regToken
     }
 }
 

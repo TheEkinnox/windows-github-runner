@@ -1,3 +1,7 @@
+# Ensure commands are run from the scripts base directory
+$basePath = (Get-Location).path
+Set-Location (split-path -parent $MyInvocation.MyCommand.Definition)
+
 # Load env file
 get-content .env | foreach {
     $name, $value = $_.split('=')
@@ -34,3 +38,6 @@ foreach ($repo in ($repos -split ',')) {
 
 #Remove PAT after cleanup
 $env:GH_TOKEN = $null
+
+# Go back to the initial path
+Set-Location $basePath
