@@ -42,10 +42,11 @@ gh config set prompt disabled
 gh auth login --with-token $env:GH_TOKEN
 
 $reposArray = ($repos -split ',')
+$rootDir = Resolve-Path("./")
 
 foreach ($repo in $reposArray)
 {
-    $runnerPath = "./runner-$repo"
+    $runnerPath = Join-Path $rootDir "runner-$repo"
 
     if (!(Test-Path $runnerPath))
     {
@@ -70,7 +71,7 @@ foreach ($repo in $reposArray)
         #(Re)start runner
         & "$runnerPath/config.cmd" remove --token $regToken
         & "$runnerPath/config.cmd" --unattended --url "https://github.com/$owner/$repo" --token $regToken --name $runnerName --replace
-        Start-Process "$runnerPath/run.cmd"
+		cmd /s /c "start ""$owner/$repo"" ""$runnerPath/run.cmd"""
     } catch {
         Write-Error $_.Exception.Message
         & "$runnerPath/config.cmd" remove --token $regToken
